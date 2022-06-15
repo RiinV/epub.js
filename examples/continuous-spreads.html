@@ -23,7 +23,7 @@
     var currentSectionIndex = (params && params.get("loc")) ? params.get("loc") : undefined;
 
     // Load the opf
-    window.book = ePub(url || "https://s3.amazonaws.com/moby-dick/moby-dick.epub");
+    window.book = ePub(url || "http://192.168.1.170:3000/OEBPS/content.opf", {userPassphrase: "Qwerty123456"});
     var rendition = book.renderTo("viewer", {
       manager: "continuous",
       flow: "paginated",

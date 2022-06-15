@@ -17,7 +17,8 @@ class Encryption {
 			const encryptionAlgorithm = node.querySelector("EncryptionMethod").getAttribute("Algorithm");
 			if(encryptionAlgorithm === ENCRYPTION_ALGORITHM){
 				const filePath = node.querySelector("CipherReference").getAttribute("URI");	
-				this.encryptedFiles.add(resolvePath(filePath));
+				const newPath = filePath.split('/').slice(1).join('/'); //Todo: add proper path handling
+				this.encryptedFiles.add(resolvePath(newPath));
 			}
 		}
 	}

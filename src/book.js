@@ -19,8 +19,8 @@ import { EPUBJS_VERSION, EVENTS } from "./utils/constants";
 import Encryption from "./encryption";
 
 const CONTAINER_PATH = "META-INF/container.xml";
-const ENCRYPTION_PATH = "META-INF/encryption.xml";
-const LICENSE_PATH = "META-INF/license.lcpl";
+const ENCRYPTION_PATH = "../META-INF/encryption.xml";
+const LICENSE_PATH = "../META-INF/license.lcpl";
 
 const IBOOKS_DISPLAY_OPTIONS_PATH = "META-INF/com.apple.ibooks.display-options.xml";
 
@@ -253,7 +253,6 @@ class Book {
 	open(input, what) {
 		var opening;
 		var type = what || this.determineType(input);
-
 		if (type === INPUT_TYPE.BINARY) {
 			this.archived = true;
 			this.url = new Url("/", "");
@@ -374,7 +373,7 @@ class Book {
 		if(this.archived) {
 			return this.archive.request(resolved, type, this.encryption);
 		} else {
-			return this.request(resolved, null, this.settings.requestCredentials, this.settings.requestHeaders);
+			return this.request(resolved, type, this.settings.requestCredentials, this.settings.requestHeaders,  this.encryption);
 		}
 	}
 
@@ -479,6 +478,9 @@ class Book {
 	 * @param {Packaging} packaging object
 	 */
 	unpack(packaging) {
+		this.openLicense();
+		this.openEncryption();
+
 		this.package = packaging; //TODO: deprecated this
 
 		if (this.packaging.metadata.layout === "") {
