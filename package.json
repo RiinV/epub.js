@@ -58,6 +58,7 @@
     "@types/localforage": "0.0.34",
     "@xmldom/xmldom": "^0.7.5",
     "core-js": "^3.18.3",
+    "crypto-js": "^4.1.1",
     "event-emitter": "^0.3.5",
     "jszip": "^3.7.1",
     "localforage": "^1.10.0",

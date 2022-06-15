@@ -16,8 +16,12 @@ import EpubCFI from "./epubcfi";
 import Store from "./store";
 import DisplayOptions from "./displayoptions";
 import { EPUBJS_VERSION, EVENTS } from "./utils/constants";
+import Encryption from "./encryption";
 
 const CONTAINER_PATH = "META-INF/container.xml";
+const ENCRYPTION_PATH = "META-INF/encryption.xml";
+const LICENSE_PATH = "META-INF/license.lcpl";
+
 const IBOOKS_DISPLAY_OPTIONS_PATH = "META-INF/com.apple.ibooks.display-options.xml";
 
 const INPUT_TYPE = {
@@ -71,6 +75,7 @@ class Book {
 
 		extend(this.settings, options);
 
+		this.userPassphrase = this.settings.userPassphrase;
 
 		// Promises
 		this.opening = new defer();
@@ -224,6 +229,8 @@ class Book {
 		 */
 		this.displayOptions = undefined;
 
+		this.encryption = undefined;
+
 		// this.toc = undefined;
 		if (this.settings.store) {
 			this.store(this.settings.store);
@@ -286,11 +293,31 @@ class Book {
 	openEpub(data, encoding) {
 		return this.unarchive(data, encoding || this.settings.encoding)
 			.then(() => {
+				return this.openLicense();
+			}, () => {})
+			.then(() => {
+				return this.openEncryption();
+			}, () => {})
+			.then(() => {
 				return this.openContainer(CONTAINER_PATH);
 			})
 			.then((packagePath) => {
 				return this.openPackaging(packagePath);
 			});
+	}
+
+	openEncryption(){
+		return this.load(ENCRYPTION_PATH)
+			.then((xml) => {
+				this.encryption.readEncryption(xml, this.resolve.bind(this));
+			});
+	}
+
+	openLicense(){
+		return this.load(LICENSE_PATH, "json").then((license) => {
+			this.encryption = new Encryption(this.userPassphrase);
+			this.encryption.decryptContentKey(license.encryption.content_key.encrypted_value);
+		});
 	}
 
 	/**
@@ -343,10 +370,10 @@ class Book {
 	 * @param  {string} path path to the resource to load
 	 * @return {Promise}     returns a promise with the requested resource
 	 */
-	load(path) {
+	load(path, type) {
 		var resolved = this.resolve(path);
 		if(this.archived) {
-			return this.archive.request(resolved);
+			return this.archive.request(resolved, type, this.encryption);
 		} else {
 			return this.request(resolved, null, this.settings.requestCredentials, this.settings.requestHeaders);
 		}
@@ -758,6 +785,8 @@ class Book {
 		this.url = undefined;
 		this.path = undefined;
 		this.archived = false;
+
+		this.encryption = undefined;
 	}
 
 }

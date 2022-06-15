@@ -60,7 +60,7 @@ class Archive {
 	 * @param  {string} [type] specify the type of the returned result
 	 * @return {Promise<Blob | string | JSON | Document | XMLDocument>}
 	 */
-	request(url, type){
+	request(url, type, encryption){
 		var deferred = new defer();
 		var response;
 		var path = new Path(url);
@@ -68,6 +68,15 @@ class Archive {
 		// If type isn't set, determine it from the file extension
 		if(!type) {
 			type = path.extension;
+		}
+		const isEncrypted = encryption && encryption.isFileEncrypted(url);
+		if(isEncrypted){
+			this.getArrayBuffer(url).then(function (data){
+				const decrypted = encryption.decrypt(data);
+				const result = this.handleResponse(decrypted, type);
+				deferred.resolve(result);
+			}.bind(this));
+			return deferred.promise;
 		}
 
 		if(type == "blob"){
@@ -152,6 +161,17 @@ class Archive {
 		if(entry) {
 			return entry.async("string").then(function(text) {
 				return text;
+			});
+		}
+	}
+
+	getArrayBuffer(url){
+		var decodedUrl = window.decodeURIComponent(url.substr(1)); // Remove first slash
+		var entry = this.zip.file(decodedUrl);
+
+		if(entry) {
+			return entry.async("arraybuffer").then(function(arraybuffer) {
+				return arraybuffer;
 			});
 		}
 	}
