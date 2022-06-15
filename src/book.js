@@ -478,8 +478,8 @@ class Book {
 	 * @param {Packaging} packaging object
 	 */
 	unpack(packaging) {
-		this.openLicense();
-		this.openEncryption();
+		this.openLicense().then(() => this.openEncryption(), () => {});
+		
 
 		this.package = packaging; //TODO: deprecated this
 
