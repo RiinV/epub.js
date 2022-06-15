@@ -478,6 +478,7 @@ class Book {
 	 * @param {Packaging} packaging object
 	 */
 	unpack(packaging) {
+		// TODO: add proper promises handling
 		this.openLicense().then(() => this.openEncryption(), () => {});
 		
 
