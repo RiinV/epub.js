@@ -13,11 +13,15 @@ class Encryption {
 	readEncryption(encryptionXml, resolvePath){
 		const nodes = encryptionXml.getElementsByTagName("EncryptedData");
 		this.encryptedFiles = new Set();
-		for (let node of nodes) {
-			const encryptionAlgorithm = node.querySelector("EncryptionMethod").getAttribute("Algorithm");
-			if(encryptionAlgorithm === ENCRYPTION_ALGORITHM){
-				const filePath = node.querySelector("CipherReference").getAttribute("URI");	
-				const newPath = filePath.split('/').slice(1).join('/'); //Todo: add proper path handling
+
+		// use regular for loop to support rn webview
+		for(let i = 0; i<nodes.length; i+=1){
+			const node = nodes[i];
+			// can't use querySelector to support rn webview
+			var encryptionAlgorithm = node.getElementsByTagName("EncryptionMethod")[0].getAttribute("Algorithm");
+			if (encryptionAlgorithm === ENCRYPTION_ALGORITHM) {
+				var filePath = node.getElementsByTagName("CipherReference")[0].getAttribute("URI");
+				var newPath = filePath.split('/').slice(1).join('/'); //Todo: add proper path handling
 				this.encryptedFiles.add(resolvePath(newPath));
 			}
 		}
@@ -57,8 +61,8 @@ class Encryption {
 		decipher.start({iv: iv});
 		decipher.update(encryptedBuffer);
 		const result = decipher.finish();
-		const output = decipher.output;
-		return output.data;
+		const output = decipher.output.toString();
+		return output;
 	}
 
 	isFileEncrypted(path){
