@@ -66,13 +66,13 @@ function request(url, type, withCredentials, headers, encryption) {
 		xhr.responseType = "arraybuffer";
 	}
 
-	xhr.send();
-
 	const isEncrypted = encryption && encryption.isFileEncrypted(url);
 	if(isEncrypted){
 		xhr.responseType = "arraybuffer";
 	}
 
+	xhr.send();
+	
 	function err(e) {
 		deferred.reject(e);
 	}
