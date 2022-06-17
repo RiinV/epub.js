@@ -340,7 +340,9 @@ class Book {
 	 */
 	openPackaging(url) {
 		this.path = new Path(url);
-		return this.load(url)
+		return this.openLicense()
+			.then(() => this.openEncryption(), () => {})
+			.then(() => this.load(url))
 			.then((xml) => {
 				this.packaging = new Packaging(xml);
 				return this.unpack(this.packaging);
@@ -479,8 +481,6 @@ class Book {
 	 */
 	unpack(packaging) {
 		// TODO: add proper promises handling
-		this.openLicense().then(() => this.openEncryption(), () => {});
-		
 
 		this.package = packaging; //TODO: deprecated this
 
