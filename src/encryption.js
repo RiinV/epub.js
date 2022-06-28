@@ -46,18 +46,19 @@ class Encryption {
 		this.contentKey = contentKey;
 	}
 
-	decrypt(data){
-		if(!this.contentKey){
+	decrypt(data) {
+		if (!this.contentKey) {
 			return "";
 		}
+
 		const decipher = cipher.createDecipher('AES-CBC', util.decode64(this.contentKey));
 		const encryptedBuffer = util.createBuffer(data);
 		const iv = encryptedBuffer.getBytes(AES_BLOCK_SIZE);
-		decipher.start({iv: iv});
+		decipher.start({ iv: iv });
 		decipher.update(encryptedBuffer);
 		const result = decipher.finish();
 		const output = decipher.output;
-		return output.data;
+		return util.decodeUtf8(output.bytes());
 	}
 
 	isFileEncrypted(path){
