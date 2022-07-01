@@ -1,5 +1,6 @@
-
 import {md, cipher, util} from "node-forge";
+import {qs, qsa} from "./utils/core";
+
 const AES_BLOCK_SIZE = 16;
 const ENCRYPTION_ALGORITHM = "http://www.w3.org/2001/04/xmlenc#aes256-cbc";
 
@@ -10,29 +11,24 @@ class Encryption {
 		this.encryptedFiles = undefined;
 	}
 
-	readEncryption(encryptionXml, resolvePath){
-		const nodes = encryptionXml.getElementsByTagName("EncryptedData");
+	readEncryption(encryptionXml, resolvePath) {
+		const nodes = qsa(encryptionXml, "EncryptedData");
 		this.encryptedFiles = new Set();
 
 		// use regular for loop to support rn webview
-		for(let i = 0; i<nodes.length; i+=1){
+		for (let i = 0; i < nodes.length; i += 1) {
 			const node = nodes[i];
 			// can't use querySelector to support rn webview
-			var encryptionAlgorithm = node.getElementsByTagName("EncryptionMethod")[0].getAttribute("Algorithm");
+			var encryptionAlgorithm = qs(node, "EncryptionMethod").getAttribute("Algorithm");
 			if (encryptionAlgorithm === ENCRYPTION_ALGORITHM) {
-				var filePath = node.getElementsByTagName("CipherReference")[0].getAttribute("URI");
-				var newPath = filePath.split('/').slice(1).join('/'); //Todo: add proper path handling
-				this.encryptedFiles.add(resolvePath(newPath));
+				var filePath = qs(node, "CipherReference").getAttribute("URI");
+				this.encryptedFiles.add(resolvePath(filePath));
 			}
 		}
 	}
 
-	readLicense(licence){
-		
-	}
-
-	decryptContentKey(encryptedContentKey){
-		if(!this.userPassphrase){
+	decryptContentKey(encryptedContentKey) {
+		if (!this.userPassphrase) {
 			return;
 		}
 		const sha256 = md.sha256.create();
@@ -43,7 +39,7 @@ class Encryption {
 		const contentKeyByteArr = util.decode64(encryptedContentKey);
 		const iv = contentKeyByteArr.slice(0, AES_BLOCK_SIZE);
 		const encrypted = contentKeyByteArr.slice(AES_BLOCK_SIZE);
-		const decipher = cipher.createDecipher('AES-CBC', userKey);
+		const decipher = cipher.createDecipher("AES-CBC", userKey);
 		decipher.start({iv: iv, additionalData_: "binary-encoded string"});
 		decipher.update(util.createBuffer(encrypted));
 		decipher.finish();
@@ -56,17 +52,17 @@ class Encryption {
 			return "";
 		}
 
-		const decipher = cipher.createDecipher('AES-CBC', util.decode64(this.contentKey));
+		const decipher = cipher.createDecipher("AES-CBC", util.decode64(this.contentKey));
 		const encryptedBuffer = util.createBuffer(data);
 		const iv = encryptedBuffer.getBytes(AES_BLOCK_SIZE);
-		decipher.start({ iv: iv });
+		decipher.start({iv: iv});
 		decipher.update(encryptedBuffer);
 		const result = decipher.finish();
 		const output = decipher.output;
 		return util.decodeUtf8(output.bytes());
 	}
 
-	isFileEncrypted(path){
+	isFileEncrypted(path) {
 		return this.encryptedFiles && this.encryptedFiles.has(path);
 	}
 
