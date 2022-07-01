@@ -15,12 +15,12 @@ import request from "./utils/request";
 import EpubCFI from "./epubcfi";
 import Store from "./store";
 import DisplayOptions from "./displayoptions";
-import { EPUBJS_VERSION, EVENTS } from "./utils/constants";
+import {EPUBJS_VERSION, EVENTS} from "./utils/constants";
 import Encryption from "./encryption";
 
 const CONTAINER_PATH = "META-INF/container.xml";
-const ENCRYPTION_PATH = "../META-INF/encryption.xml";
-const LICENSE_PATH = "../META-INF/license.lcpl";
+const ENCRYPTION_PATH = "META-INF/encryption.xml";
+const LICENSE_PATH = "META-INF/license.lcpl";
 
 const IBOOKS_DISPLAY_OPTIONS_PATH = "META-INF/com.apple.ibooks.display-options.xml";
 
@@ -54,9 +54,10 @@ const INPUT_TYPE = {
 class Book {
 	constructor(url, options) {
 		// Allow passing just options to the Book
-		if (typeof(options) === "undefined" &&
-			  typeof(url) !== "string" &&
-		    url instanceof Blob === false) {
+		if (typeof (options) === "undefined" &&
+			typeof (url) !== "string" &&
+			url instanceof Blob === false &&
+			url instanceof ArrayBuffer === false) {
 			options = url;
 			url = undefined;
 		}
@@ -235,9 +236,9 @@ class Book {
 			this.store(this.settings.store);
 		}
 
-		if(url) {
+		if (url) {
 			this.open(url, this.settings.openAs).catch((error) => {
-				var err = new Error("Cannot load book at "+ url );
+				var err = new Error("Cannot load book at " + url);
 				this.emit(EVENTS.BOOK.OPEN_FAILED, err);
 			});
 		}
@@ -253,6 +254,7 @@ class Book {
 	open(input, what) {
 		var opening;
 		var type = what || this.determineType(input);
+
 		if (type === INPUT_TYPE.BINARY) {
 			this.archived = true;
 			this.url = new Url("/", "");
@@ -266,12 +268,15 @@ class Book {
 			this.url = new Url("/", "");
 			opening = this.request(input, "binary", this.settings.requestCredentials, this.settings.requestHeaders)
 				.then(this.openEpub.bind(this));
-		} else if(type == INPUT_TYPE.OPF) {
+		} else if (type == INPUT_TYPE.OPF) {
 			this.url = new Url(input);
 			opening = this.openPackaging(this.url.Path.toString());
-		} else if(type == INPUT_TYPE.MANIFEST) {
+		} else if (type == INPUT_TYPE.MANIFEST) {
 			this.url = new Url(input);
 			opening = this.openManifest(this.url.Path.toString());
+		} else if (type == INPUT_TYPE.DIRECTORY) {
+			this.url = new Url(input);
+			opening = this.openEpubFromPath();
 		} else {
 			this.url = new Url(input);
 			opening = this.openContainer(CONTAINER_PATH)
@@ -292,10 +297,12 @@ class Book {
 		return this.unarchive(data, encoding || this.settings.encoding)
 			.then(() => {
 				return this.openLicense();
-			}, () => {})
+			}, () => {
+			})
 			.then(() => {
 				return this.openEncryption();
-			}, () => {})
+			}, () => {
+			})
 			.then(() => {
 				return this.openContainer(CONTAINER_PATH);
 			})
@@ -304,17 +311,39 @@ class Book {
 			});
 	}
 
-	openEncryption(){
-		return this.load(ENCRYPTION_PATH)
-			.then((xml) => {
-				this.encryption.readEncryption(xml, this.resolve.bind(this));
+	/**
+	 * Open an archived epub
+	 * @private
+	 * @return {Promise}
+	 */
+	openEpubFromPath() {
+		return this.openLicense()
+			.then(() => {
+				return this.openEncryption();
+			})
+			.then(() => {
+				return this.openContainer(CONTAINER_PATH);
+			})
+			.then((packagePath) => {
+				return this.openPackaging(packagePath);
 			});
 	}
 
-	openLicense(){
+	openEncryption() {
+		return this.load(ENCRYPTION_PATH)
+			.then((xml) => {
+				this.encryption.readEncryption(xml, this.resolve.bind(this));
+			}).catch((err) => {
+				// The epub file is not encrypted.
+			});
+	}
+
+	openLicense() {
 		return this.load(LICENSE_PATH, "json").then((license) => {
 			this.encryption = new Encryption(this.userPassphrase);
 			this.encryption.decryptContentKey(license.encryption.content_key.encrypted_value);
+		}).catch((err) => {
+			// The epub file is not encrypted.
 		});
 	}
 
@@ -340,9 +369,7 @@ class Book {
 	 */
 	openPackaging(url) {
 		this.path = new Path(url);
-		return this.openLicense()
-			.then(() => this.openEncryption(), () => {})
-			.then(() => this.load(url))
+		return this.load(url)
 			.then((xml) => {
 				this.packaging = new Packaging(xml);
 				return this.unpack(this.packaging);
@@ -372,10 +399,10 @@ class Book {
 	 */
 	load(path, type) {
 		var resolved = this.resolve(path);
-		if(this.archived) {
+		if (this.archived) {
 			return this.archive.request(resolved, type, this.encryption);
 		} else {
-			return this.request(resolved, type, this.settings.requestCredentials, this.settings.requestHeaders,  this.encryption);
+			return this.request(resolved, type, this.settings.requestCredentials, this.settings.requestHeaders, this.encryption);
 		}
 	}
 
@@ -400,7 +427,7 @@ class Book {
 			resolved = this.path.resolve(path);
 		}
 
-		if(absolute != false && this.url) {
+		if (absolute != false && this.url) {
 			resolved = this.url.resolve(resolved);
 		}
 
@@ -443,7 +470,7 @@ class Book {
 			return INPUT_TYPE.BASE64;
 		}
 
-		if(typeof(input) != "string") {
+		if (typeof (input) != "string") {
 			return INPUT_TYPE.BINARY;
 		}
 
@@ -460,15 +487,15 @@ class Book {
 			return INPUT_TYPE.DIRECTORY;
 		}
 
-		if(extension === "epub"){
+		if (extension === "epub") {
 			return INPUT_TYPE.EPUB;
 		}
 
-		if(extension === "opf"){
+		if (extension === "opf") {
 			return INPUT_TYPE.OPF;
 		}
 
-		if(extension === "json"){
+		if (extension === "json") {
 			return INPUT_TYPE.MANIFEST;
 		}
 	}
@@ -480,8 +507,6 @@ class Book {
 	 * @param {Packaging} packaging object
 	 */
 	unpack(packaging) {
-		// TODO: add proper promises handling
-
 		this.package = packaging; //TODO: deprecated this
 
 		if (this.packaging.metadata.layout === "") {
@@ -525,15 +550,15 @@ class Book {
 
 		this.isOpen = true;
 
-		if(this.archived || this.settings.replacements && this.settings.replacements != "none") {
+		if (this.archived || this.settings.replacements && this.settings.replacements != "none") {
 			this.replacements().then(() => {
 				this.loaded.displayOptions.then(() => {
 					this.opening.resolve(this);
 				});
 			})
-			.catch((err) => {
-				console.error(err);
-			});
+				.catch((err) => {
+					console.error(err);
+				});
 		} else {
 			// Resolve book opened promise
 			this.loaded.displayOptions.then(() => {
@@ -664,10 +689,9 @@ class Book {
 			// Set to use replacements
 			this.resources.settings.replacements = replacementsSetting || "blobUrl";
 			// Create replacement urls
-			this.resources.replacements().
-				then(() => {
-					return this.resources.replaceCss();
-				});
+			this.resources.replacements().then(() => {
+				return this.resources.replaceCss();
+			});
 
 			this.storage.on("offline", () => {
 				// Remove url to use relative resolving for hrefs
@@ -690,20 +714,20 @@ class Book {
 
 	/**
 	 * Get the cover url
-	 * @return {string} coverUrl
+	 * @return {Promise<?string>} coverUrl
 	 */
 	coverUrl() {
-		var retrieved = this.loaded.cover.
-			then((url) => {
-				if(this.archived) {
-					// return this.archive.createUrl(this.cover);
-					return this.resources.get(this.cover);
-				}else{
-					return this.cover;
-				}
-			});
+		return this.loaded.cover.then(() => {
+			if (!this.cover) {
+				return null;
+			}
 
-		return retrieved;
+			if (this.archived) {
+				return this.archive.createUrl(this.cover);
+			} else {
+				return this.cover;
+			}
+		});
 	}
 
 	/**
@@ -716,16 +740,15 @@ class Book {
 			section.output = this.resources.substitute(output, section.url);
 		});
 
-		return this.resources.replacements().
-			then(() => {
-				return this.resources.replaceCss();
-			});
+		return this.resources.replacements().then(() => {
+			return this.resources.replaceCss();
+		});
 	}
 
 	/**
 	 * Find a DOM Range for a given CFI Range
 	 * @param  {EpubCFI} cfiRange a epub cfi range
-	 * @return {Range}
+	 * @return {Promise}
 	 */
 	getRange(cfiRange) {
 		var cfi = new EpubCFI(cfiRange);
@@ -743,7 +766,7 @@ class Book {
 	}
 
 	/**
-	 * Generates the Book Key using the identifer in the manifest or other string provided
+	 * Generates the Book Key using the identifier in the manifest or other string provided
 	 * @param  {string} [identifier] to use instead of metadata identifier
 	 * @return {string} key
 	 */

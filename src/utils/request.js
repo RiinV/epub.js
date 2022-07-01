@@ -18,11 +18,12 @@ function request(url, type, withCredentials, headers, encryption) {
 	if (!("overrideMimeType" in xhrPrototype)) {
 		// IE10 might have response, but not overrideMimeType
 		Object.defineProperty(xhrPrototype, "overrideMimeType", {
-			value: function xmlHttpRequestOverrideMimeType() {}
+			value: function xmlHttpRequestOverrideMimeType() {
+			}
 		});
 	}
 
-	if(withCredentials) {
+	if (withCredentials) {
 		xhr.withCredentials = true;
 	}
 
@@ -31,48 +32,44 @@ function request(url, type, withCredentials, headers, encryption) {
 
 	xhr.open("GET", url, true);
 
-	for(header in headers) {
+	for (header in headers) {
 		xhr.setRequestHeader(header, headers[header]);
 	}
 
-	if(type == "json") {
+	if (type == "json") {
 		xhr.setRequestHeader("Accept", "application/json");
 	}
 
 	// If type isn"t set, determine it from the file extension
-	if(!type) {
+	if (!type) {
 		type = new Path(url).extension;
 	}
 
-	if(type == "blob"){
+	if (type == "blob") {
 		xhr.responseType = BLOB_RESPONSE;
 	}
 
 
-	if(isXml(type)) {
+	if (isXml(type)) {
 		// xhr.responseType = "document";
 		xhr.overrideMimeType("text/xml"); // for OPF parsing
 	}
 
-	if(type == "xhtml") {
+	if (type == "xhtml") {
 		// xhr.responseType = "document";
 	}
 
-	if(type == "html" || type == "htm") {
+	if (type == "html" || type == "htm") {
 		// xhr.responseType = "document";
-	}
-
-	if(type == "binary") {
-		xhr.responseType = "arraybuffer";
 	}
 
 	const isEncrypted = encryption && encryption.isFileEncrypted(url);
-	if(isEncrypted){
+	if (isEncrypted || type == "binary") {
 		xhr.responseType = "arraybuffer";
 	}
 
 	xhr.send();
-	
+
 	function err(e) {
 		deferred.reject(e);
 	}
@@ -81,7 +78,7 @@ function request(url, type, withCredentials, headers, encryption) {
 		if (this.readyState === XMLHttpRequest.DONE) {
 			var responseXML = false;
 
-			if(this.responseType === "" || this.responseType === "document") {
+			if (this.responseType === "" || this.responseType === "document") {
 				responseXML = this.responseXML;
 			}
 
@@ -91,8 +88,8 @@ function request(url, type, withCredentials, headers, encryption) {
 				if (!this.response && !responseXML) {
 					deferred.reject({
 						status: this.status,
-						message : "Empty Response",
-						stack : new Error().stack
+						message: "Empty Response",
+						stack: new Error().stack
 					});
 					return deferred.promise;
 				}
@@ -101,46 +98,42 @@ function request(url, type, withCredentials, headers, encryption) {
 					deferred.reject({
 						status: this.status,
 						response: this.response,
-						message : "Forbidden",
-						stack : new Error().stack
+						message: "Forbidden",
+						stack: new Error().stack
 					});
 					return deferred.promise;
 				}
-				let responseToParse = this.response;
-				if(isEncrypted){
-					const decrypted = encryption.decrypt( this.response);
-					responseToParse = decrypted;
+
+
+				if (isEncrypted) {
+					const decrypted = encryption.decrypt(this.response);
+					const result = handleResponse(decrypted, type);
+					deferred.resolve(result);
 				}
 
-
-				if(responseXML){
+				if (responseXML) {
 					r = this.responseXML;
-				} else
-				if(isXml(type)){
+				} else if (isXml(type)) {
 					// xhr.overrideMimeType("text/xml"); // for OPF parsing
 					// If this.responseXML wasn't set, try to parse using a DOMParser from text
-					r = parse(responseToParse, "text/xml");
-				}else
-				if(type == "xhtml"){
-					r = parse(responseToParse, "application/xhtml+xml");
-				}else
-				if(type == "html" || type == "htm"){
-					r = parse(responseToParse, "text/html");
-				}else
-				if(type == "json"){
-					r = JSON.parse(responseToParse);
-				}else
-				if(type == "blob"){
+					r = parse(this.response, "text/xml");
+				} else if (type == "xhtml") {
+					r = parse(this.response, "application/xhtml+xml");
+				} else if (type == "html" || type == "htm") {
+					r = parse(this.response, "text/html");
+				} else if (type == "json") {
+					r = JSON.parse(this.response);
+				} else if (type == "blob") {
 
-					if(supportsURL) {
-						r =responseToParse;
+					if (supportsURL) {
+						r = this.response;
 					} else {
 						//-- Safari doesn't support responseType blob, so create a blob from arraybuffer
-						r = new Blob([responseToParse]);
+						r = new Blob([this.response]);
 					}
 
-				}else{
-					r = responseToParse;
+				} else {
+					r = this.response;
 				}
 
 				deferred.resolve(r);
@@ -148,8 +141,8 @@ function request(url, type, withCredentials, headers, encryption) {
 
 				deferred.reject({
 					status: this.status,
-					message : this.response,
-					stack : new Error().stack
+					message: this.response,
+					stack: new Error().stack
 				});
 
 			}
@@ -157,6 +150,37 @@ function request(url, type, withCredentials, headers, encryption) {
 	}
 
 	return deferred.promise;
+}
+
+/**
+ * Handle the response from request
+ * @private
+ * @param  {any} response
+ * @param  {string} [type]
+ * @return {any} the parsed result
+ */
+function handleResponse(response, type){
+	var r;
+
+	if(type == "json") {
+		r = JSON.parse(response);
+	}
+	else
+	if(isXml(type)) {
+		r = parse(response, "text/xml");
+	}
+	else
+	if(type == "xhtml") {
+		r = parse(response, "application/xhtml+xml");
+	}
+	else
+	if(type == "html" || type == "htm") {
+		r = parse(response, "text/html");
+	} else {
+		r = response;
+	}
+
+	return r;
 }
 
 export default request;
