@@ -9,11 +9,13 @@ class Encryption {
 		this.userPassphrase = userPassphrase;
 		this.contentKey = undefined;
 		this.encryptedFiles = undefined;
+		this.checkedFiles = [];
 	}
 
 	readEncryption(encryptionXml, resolvePath) {
 		const nodes = qsa(encryptionXml, "EncryptedData");
 		this.encryptedFiles = new Set();
+		this.checkedFiles = [];
 
 		// use regular for loop to support rn webview
 		for (let i = 0; i < nodes.length; i += 1) {
@@ -63,7 +65,9 @@ class Encryption {
 	}
 
 	isFileEncrypted(path) {
-		return this.encryptedFiles && this.encryptedFiles.has(path);
+		let isEncrypted = this.encryptedFiles && this.encryptedFiles.has(path);
+		this.checkedFiles[path] = isEncrypted;
+		return isEncrypted;
 	}
 
 	destroy() {
