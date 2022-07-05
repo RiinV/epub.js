@@ -330,7 +330,12 @@ class Book {
 	}
 
 	openEncryption() {
-		return this.load(ENCRYPTION_PATH)
+		let path = ENCRYPTION_PATH;
+		if (!this.archived) {
+			path = this.url.resolve(ENCRYPTION_PATH);
+		}
+
+		return this.load(path)
 			.then((xml) => {
 				this.encryption.readEncryption(xml, this.resolve.bind(this));
 			}).catch((err) => {
@@ -339,7 +344,12 @@ class Book {
 	}
 
 	openLicense() {
-		return this.load(LICENSE_PATH, "json").then((license) => {
+		let path = LICENSE_PATH;
+		if (!this.archived) {
+			path = this.url.resolve(LICENSE_PATH);
+		}
+
+		return this.load(path, "json").then((license) => {
 			this.encryption = new Encryption(this.userPassphrase);
 			this.encryption.decryptContentKey(license.encryption.content_key.encrypted_value);
 		}).catch((err) => {
