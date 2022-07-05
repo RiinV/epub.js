@@ -275,8 +275,7 @@ class Book {
 			this.url = new Url(input);
 			opening = this.openManifest(this.url.Path.toString());
 		} else if (type == INPUT_TYPE.DIRECTORY) {
-			this.url = new Url(input, "");
-			opening = this.openEpubFromPath();
+			opening = this.openEpubFromPath(input);
 		} else {
 			this.url = new Url(input);
 			opening = this.openContainer(CONTAINER_PATH)
@@ -313,10 +312,10 @@ class Book {
 
 	/**
 	 * Open an archived epub
-	 * @private
 	 * @return {Promise}
 	 */
-	openEpubFromPath() {
+	openEpubFromPath(input) {
+		this.url = new Url(input, "");
 		return this.openLicense()
 			.then(() => {
 				return this.openEncryption();
@@ -330,36 +329,25 @@ class Book {
 	}
 
 	openEncryption() {
-		let path = ENCRYPTION_PATH;
-		if (!this.archived) {
-			path = this.url.resolve(ENCRYPTION_PATH);
-		}
-
-		return this.load(path)
+		return this.load(ENCRYPTION_PATH)
 			.then((xml) => {
 				this.encryption.readEncryption(xml, this.resolve.bind(this));
 			}).catch((err) => {
-				// The epub file is not encrypted.
+				console.log("The epub file is not encrypted.");
 			});
 	}
 
 	openLicense() {
-		let path = LICENSE_PATH;
-		if (!this.archived) {
-			path = this.url.resolve(LICENSE_PATH);
-		}
-
-		return this.load(path, "json").then((license) => {
+		return this.load(LICENSE_PATH, "json").then((license) => {
 			this.encryption = new Encryption(this.userPassphrase);
 			this.encryption.decryptContentKey(license.encryption.content_key.encrypted_value);
 		}).catch((err) => {
-			// The epub file is not encrypted.
+			console.log("The epub file is not encrypted.");
 		});
 	}
 
 	/**
 	 * Open the epub container
-	 * @private
 	 * @param  {string} url
 	 * @return {string} packagePath
 	 */
@@ -373,7 +361,6 @@ class Book {
 
 	/**
 	 * Open the Open Packaging Format Xml
-	 * @private
 	 * @param  {string} url
 	 * @return {Promise}
 	 */
