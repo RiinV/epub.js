@@ -275,7 +275,7 @@ class Book {
 			this.url = new Url(input);
 			opening = this.openManifest(this.url.Path.toString());
 		} else if (type == INPUT_TYPE.DIRECTORY) {
-			this.url = new Url(input);
+			this.url = new Url(input, "");
 			opening = this.openEpubFromPath();
 		} else {
 			this.url = new Url(input);
