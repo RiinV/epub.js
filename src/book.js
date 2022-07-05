@@ -335,7 +335,7 @@ class Book {
 			.then((xml) => {
 				this.encryption.readEncryption(xml, this.resolve.bind(this));
 			}).catch((err) => {
-				console.log("The epub file is not encrypted.");
+				console.log("The epub file is not encrypted!");
 			});
 	}
 
