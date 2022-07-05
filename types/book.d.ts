@@ -86,7 +86,7 @@ export default class Book {
 
     openEpub(data: BinaryType, encoding?: string): Promise<Book>;
 
-    openEpubFromPath(): Promise<Book>;
+    openEpubFromPath(url: string): Promise<Book>;
 
     openManifest(url: string): Promise<Book>;
 

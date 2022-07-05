@@ -275,8 +275,8 @@ class Book {
 			this.url = new Url(input);
 			opening = this.openManifest(this.url.Path.toString());
 		} else if (type == INPUT_TYPE.DIRECTORY) {
-			this.url = new Url(input, "");
-			opening = this.openEpubFromPath();
+			this.url = new Url(input);
+			opening = this.openEpubFromPath(this.url.Path.toString());
 		} else {
 			this.url = new Url(input);
 			opening = this.openContainer(CONTAINER_PATH)
@@ -313,9 +313,11 @@ class Book {
 
 	/**
 	 * Open an archived epub
+	 * @param  {string} url
 	 * @return {Promise}
 	 */
-	openEpubFromPath() {
+	openEpubFromPath(url) {
+		this.path = new Path(url);
 		return this.openLicense()
 			.then(() => {
 				return this.openEncryption();
