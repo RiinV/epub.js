@@ -18,7 +18,6 @@ import ContinuousViewManager from "./managers/continuous";
  * @example ePub("/path/to/book.epub", {})
  */
 function ePub(url, options) {
-  console.log("test if changes apply", url, options);
   return new Book(url, options);
 }
 
