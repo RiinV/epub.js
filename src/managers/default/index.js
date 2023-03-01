@@ -412,6 +412,9 @@ class DefaultViewManager {
 	// };
 
 	next(){
+
+		// document.documentElement.style.position = "unset";
+		// document.documentElement.style.left = -window.scrollX - this.layout.delta + "px";
 		var next;
 		var left;
 
@@ -421,9 +424,9 @@ class DefaultViewManager {
 
 		if(this.isPaginated && this.settings.axis === "horizontal" && (!dir || dir === "ltr")) {
 
-			this.scrollLeft = this.container.scrollLeft;
+			this.scrollLeft = window.scrollX;
 
-			left = this.container.scrollLeft + this.container.offsetWidth + this.layout.delta;
+			left = window.scrollX + this.container.offsetWidth + this.layout.delta;
 
 			if(left <= this.container.scrollWidth) {
 				this.scrollBy(this.layout.delta, 0, true);
@@ -457,7 +460,8 @@ class DefaultViewManager {
 		} else {
 			next = this.views.last().section.next();
 		}
-
+		// this.windowX = window.scrollX;
+		// document.documentElement.style.position = "fixed";
 		if(next) {
 			this.clear();
 
@@ -481,6 +485,8 @@ class DefaultViewManager {
 	}
 
 	prev(){
+		// document.documentElement.style.position = "unset";
+		// document.documentElement.style.left = -window.scrollX + this.layout.delta + "px";
 		var prev;
 		var left;
 		let dir = this.settings.direction;
@@ -489,9 +495,9 @@ class DefaultViewManager {
 
 		if(this.isPaginated && this.settings.axis === "horizontal" && (!dir || dir === "ltr")) {
 
-			this.scrollLeft = this.container.scrollLeft;
+			this.scrollLeft = window.scrollX;
 
-			left = this.container.scrollLeft;
+			left = window.scrollX;
 
 			if(left > 0) {
 				this.scrollBy(-this.layout.delta, 0, true);
@@ -529,6 +535,7 @@ class DefaultViewManager {
 
 		}
 
+		// document.documentElement.style.position = "fixed";		
 		if(prev) {
 			this.clear();
 
