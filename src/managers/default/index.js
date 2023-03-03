@@ -360,6 +360,9 @@ class DefaultViewManager {
 	}
 
 	append(section, forceRight){
+		// TODO Mega ugly, dispatch an event and listen on epubjs-rn instead
+		if(window.ReactNativeWebView)
+			window.ReactNativeWebView.postMessage(JSON.stringify({method: 'hide'}));
 		var view = this.createView(section, forceRight);
 		this.views.append(view);
 
@@ -374,6 +377,9 @@ class DefaultViewManager {
 	}
 
 	prepend(section, forceRight){
+		// TODO Mega ugly, dispatch an event and listen on epubjs-rn instead
+		if(window.ReactNativeWebView)
+			window.ReactNativeWebView.postMessage(JSON.stringify({method: 'hide'}));
 		var view = this.createView(section, forceRight);
 
 		view.on(EVENTS.VIEWS.RESIZED, (bounds) => {
