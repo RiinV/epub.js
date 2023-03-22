@@ -192,6 +192,10 @@ class Themes {
 			theme.injected = true;
 		} else if (theme.rules) {
 			contents.addStylesheetRules(theme.rules, name);
+			// To prevent white flash when changing chapters
+			const bgColor = theme.rules.body["background-color"];
+			const container = this.rendition.views().container;
+			container.style.cssText += "background-color:" + bgColor + ";";
 			theme.injected = true;
 		}
 	}
