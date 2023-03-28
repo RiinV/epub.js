@@ -5,6 +5,7 @@ import Queue from "../../utils/queue";
 import Stage from "../helpers/stage";
 import Views from "../helpers/views";
 import { EVENTS } from "../../utils/constants";
+import { debounce } from "lodash";
 
 class DefaultViewManager {
 	constructor(options) {
@@ -42,6 +43,17 @@ class DefaultViewManager {
 
 		this.rendered = false;
 
+	}
+
+	prepareLayoutAndDisplay(){
+		var updateLayout = this.updateLayout.bind(this);
+		var show = this.views.show.bind(this.views);
+		updateLayout();
+		if(this.cfiToLoad) {
+			window.rendition.display(this.cfiToLoad);
+		}
+		this.cfiToLoad = null;
+		show();
 	}
 
 	render(element, size){
@@ -295,6 +307,7 @@ class DefaultViewManager {
 				if(target) {
 					let offset = view.locationOf(target);
 					this.moveTo(offset);
+					this.cfiToLoad = target;
 				}
 
 			}.bind(this), (err) => {
@@ -305,7 +318,8 @@ class DefaultViewManager {
 			}.bind(this))
 			.then(function(){
 
-				this.views.show();
+				// using prepareLayoutAndDisplay as callback instead
+				// this.views.show();
 
 				displaying.resolve();
 
@@ -321,6 +335,8 @@ class DefaultViewManager {
 
 	afterDisplayed(view){
 		this.emit(EVENTS.MANAGERS.ADDED, view);
+		var callback = debounce(this.prepareLayoutAndDisplay.bind(this), 150);
+		view.document.fonts.onloadingdone = callback;
 	}
 
 	afterResized(view){
@@ -360,9 +376,6 @@ class DefaultViewManager {
 	}
 
 	append(section, forceRight){
-		// TODO Mega ugly, dispatch an event and listen on epubjs-rn instead
-		if(window.ReactNativeWebView)
-			window.ReactNativeWebView.postMessage(JSON.stringify({method: 'hide'}));
 		var view = this.createView(section, forceRight);
 		this.views.append(view);
 
@@ -377,9 +390,6 @@ class DefaultViewManager {
 	}
 
 	prepend(section, forceRight){
-		// TODO Mega ugly, dispatch an event and listen on epubjs-rn instead
-		if(window.ReactNativeWebView)
-			window.ReactNativeWebView.postMessage(JSON.stringify({method: 'hide'}));
 		var view = this.createView(section, forceRight);
 
 		view.on(EVENTS.VIEWS.RESIZED, (bounds) => {
@@ -483,7 +493,8 @@ class DefaultViewManager {
 					return err;
 				})
 				.then(function(){
-					this.views.show();
+					// using prepareLayoutAndDisplay as callback instead
+					// this.views.show();
 				}.bind(this));
 		}
 
@@ -570,7 +581,8 @@ class DefaultViewManager {
 							this.scrollTo(this.container.scrollWidth - this.layout.delta, 0, true);
 						}
 					}
-					this.views.show();
+					// using prepareLayoutAndDisplay as callback instead
+					// this.views.show();
 				}.bind(this));
 		}
 	}
