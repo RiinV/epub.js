@@ -319,7 +319,10 @@ class DefaultViewManager {
 			.then(function(){
 
 				// using prepareLayoutAndDisplay as callback instead
-				// this.views.show();
+        if (window.platform === "ios") {
+          this.views.show();
+        }
+
 
 				displaying.resolve();
 
@@ -335,8 +338,11 @@ class DefaultViewManager {
 
 	afterDisplayed(view){
 		this.emit(EVENTS.MANAGERS.ADDED, view);
-		var callback = debounce(this.prepareLayoutAndDisplay.bind(this), 150);
-		view.document.fonts.onloadingdone = callback;
+
+    if (window.platform != "ios") {
+      var callback = debounce(this.prepareLayoutAndDisplay.bind(this), 150);
+      view.document.fonts.onloadingdone = callback;
+    }
 	}
 
 	afterResized(view){
@@ -493,8 +499,10 @@ class DefaultViewManager {
 					return err;
 				})
 				.then(function(){
-					// using prepareLayoutAndDisplay as callback instead
-					// this.views.show();
+					// using prepareLayoutAndDisplay as callback instead on android
+          if (window.platform === 'ios') {
+            this.views.show();
+          }
 				}.bind(this));
 		}
 
@@ -581,8 +589,10 @@ class DefaultViewManager {
 							this.scrollTo(this.container.scrollWidth - this.layout.delta, 0, true);
 						}
 					}
-					// using prepareLayoutAndDisplay as callback instead
-					// this.views.show();
+					// using prepareLayoutAndDisplay as callback instead on android
+          if (window.platform === "ios") {
+            this.views.show();
+          }
 				}.bind(this));
 		}
 	}
