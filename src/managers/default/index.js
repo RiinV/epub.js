@@ -50,7 +50,7 @@ class DefaultViewManager {
     var show = this.views.show.bind(this.views);
     if (!this.areFontsLoading) {
       show();
-    } else setTimeout(this.showIfFontsNotLoading.bind(this), 100);
+    } else setTimeout(this.showIfFontsNotLoading.bind(this), 50);
   }
   
   startLoadingFonts(){
@@ -164,7 +164,7 @@ class DefaultViewManager {
 	destroy(){
 		clearTimeout(this.orientationTimeout);
 		clearTimeout(this.resizeTimeout);
-		clearTimeout(this.afterScrolled);
+		// clearTimeout(this.afterScrolled);
 
 		this.clear();
 
@@ -331,7 +331,7 @@ class DefaultViewManager {
 			}.bind(this))
 			.then(function(){
 
-        setTimeout(this.showIfFontsNotLoading.bind(this), 100);
+        setTimeout(this.showIfFontsNotLoading.bind(this), 50);
 
 				displaying.resolve();
 
@@ -510,7 +510,7 @@ class DefaultViewManager {
 					return err;
 				})
 				.then(function(){
-          setTimeout(this.showIfFontsNotLoading.bind(this), 100);
+          setTimeout(this.showIfFontsNotLoading.bind(this), 50);
 				}.bind(this));
 		}
 
@@ -597,7 +597,7 @@ class DefaultViewManager {
 							this.scrollTo(this.container.scrollWidth - this.layout.delta, 0, true);
 						}
 					}
-          setTimeout(this.showIfFontsNotLoading.bind(this), 100);
+          setTimeout(this.showIfFontsNotLoading.bind(this), 50);
 				}.bind(this));
 		}
 	}
@@ -833,13 +833,15 @@ class DefaultViewManager {
 				left: scrollLeft
 			});
 
-			clearTimeout(this.afterScrolled);
-			this.afterScrolled = setTimeout(function () {
-				this.emit(EVENTS.MANAGERS.SCROLLED, {
-					top: this.scrollTop,
-					left: this.scrollLeft
-				});
-			}.bind(this), 20);
+			// clearTimeout(this.afterScrolled);
+			// this.afterScrolled = setTimeout(function () {
+     
+			// }.bind(this), 20);
+
+      this.emit(EVENTS.MANAGERS.SCROLLED, {
+        top: this.scrollTop,
+        left: this.scrollLeft
+      });
 
 
 
