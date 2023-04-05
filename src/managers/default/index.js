@@ -47,7 +47,6 @@ class DefaultViewManager {
 	}
 
   showIfFontsNotLoading(){
-    window.ReactNativeWebView.postMessage(`arefontsloading, ${this.areFontsLoading}`);
     var show = this.views.show.bind(this.views);
     if (!this.areFontsLoading) {
       show();
@@ -55,12 +54,11 @@ class DefaultViewManager {
   }
   
   startLoadingFonts(){
-    window.ReactNativeWebView.postMessage("start loading font");
     this.areFontsLoading = true;
+    window.ReactNativeWebView.postMessage(JSON.stringify({ method: "font", value: true }));
   }
 
 	prepareLayoutAndDisplay(){
-    window.ReactNativeWebView.postMessage("prepareLayoutAndDisplay");
 		var updateLayout = this.updateLayout.bind(this);
     updateLayout();
 		if(this.cfiToLoad) {
@@ -68,6 +66,7 @@ class DefaultViewManager {
 		}
 		this.cfiToLoad = null;
     this.areFontsLoading = false;
+    window.ReactNativeWebView.postMessage(JSON.stringify({ method: "font", value: false }));
 	}
 
 	render(element, size){
@@ -349,10 +348,9 @@ class DefaultViewManager {
 	afterDisplayed(view){
 		this.emit(EVENTS.MANAGERS.ADDED, view);
     if (window.platform !== "ios") {
-      // window.ReactNativeWebView.postMessage("setting font callback for android");
       var onFontsLoadingDone = debounce(this.prepareLayoutAndDisplay.bind(this), 150);
       var onFontsLoadingStart = this.startLoadingFonts.bind(this);
-      // window.ReactNativeWebView.postMessage(`view.document.fonts: ${JSON.stringify(view.document.fonts)}`);
+
       view.document.fonts.onloadingdone = onFontsLoadingDone;
       view.document.fonts.onloading = onFontsLoadingStart;
     }

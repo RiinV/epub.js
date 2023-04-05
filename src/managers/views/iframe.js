@@ -362,7 +362,7 @@ class IframeView {
 		}
 
 		this.iframe.onload = function(event) {
-
+      
 			this.onLoad(event, loading);
 
 		}.bind(this);
@@ -505,7 +505,7 @@ class IframeView {
 	}
 
 	show() {
-    
+
 		this.element.style.visibility = "visible";
 
 		if(this.iframe){
