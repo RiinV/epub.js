@@ -357,7 +357,7 @@ class InlineView {
 	}
 
 	show() {
-
+    
 		this.element.style.visibility = "visible";
 
 		if(this.frame){

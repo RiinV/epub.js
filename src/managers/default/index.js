@@ -16,6 +16,7 @@ class DefaultViewManager {
 		this.request = options.request;
 		this.renditionQueue = options.queue;
 		this.q = new Queue(this);
+    this.areFontsLoading = false;
 
 		this.settings = extend(this.settings || {}, {
 			infinite: true,
@@ -45,15 +46,28 @@ class DefaultViewManager {
 
 	}
 
+  showIfFontsNotLoading(){
+    window.ReactNativeWebView.postMessage(`arefontsloading, ${this.areFontsLoading}`);
+    var show = this.views.show.bind(this.views);
+    if (!this.areFontsLoading) {
+      show();
+    } else setTimeout(this.showIfFontsNotLoading.bind(this), 100);
+  }
+  
+  startLoadingFonts(){
+    window.ReactNativeWebView.postMessage("start loading font");
+    this.areFontsLoading = true;
+  }
+
 	prepareLayoutAndDisplay(){
+    window.ReactNativeWebView.postMessage("prepareLayoutAndDisplay");
 		var updateLayout = this.updateLayout.bind(this);
-		var show = this.views.show.bind(this.views);
-		updateLayout();
+    updateLayout();
 		if(this.cfiToLoad) {
 			window.rendition.display(this.cfiToLoad);
 		}
 		this.cfiToLoad = null;
-		show();
+    this.areFontsLoading = false;
 	}
 
 	render(element, size){
@@ -318,11 +332,7 @@ class DefaultViewManager {
 			}.bind(this))
 			.then(function(){
 
-				// using prepareLayoutAndDisplay as callback instead
-        if (window.platform === "ios") {
-          this.views.show();
-        }
-
+        setTimeout(this.showIfFontsNotLoading.bind(this), 100);
 
 				displaying.resolve();
 
@@ -338,10 +348,13 @@ class DefaultViewManager {
 
 	afterDisplayed(view){
 		this.emit(EVENTS.MANAGERS.ADDED, view);
-
-    if (window.platform != "ios") {
-      var callback = debounce(this.prepareLayoutAndDisplay.bind(this), 150);
-      view.document.fonts.onloadingdone = callback;
+    if (window.platform !== "ios") {
+      // window.ReactNativeWebView.postMessage("setting font callback for android");
+      var onFontsLoadingDone = debounce(this.prepareLayoutAndDisplay.bind(this), 150);
+      var onFontsLoadingStart = this.startLoadingFonts.bind(this);
+      // window.ReactNativeWebView.postMessage(`view.document.fonts: ${JSON.stringify(view.document.fonts)}`);
+      view.document.fonts.onloadingdone = onFontsLoadingDone;
+      view.document.fonts.onloading = onFontsLoadingStart;
     }
 	}
 
@@ -499,10 +512,7 @@ class DefaultViewManager {
 					return err;
 				})
 				.then(function(){
-					// using prepareLayoutAndDisplay as callback instead on android
-          if (window.platform === 'ios') {
-            this.views.show();
-          }
+          setTimeout(this.showIfFontsNotLoading.bind(this), 100);
 				}.bind(this));
 		}
 
@@ -589,10 +599,7 @@ class DefaultViewManager {
 							this.scrollTo(this.container.scrollWidth - this.layout.delta, 0, true);
 						}
 					}
-					// using prepareLayoutAndDisplay as callback instead on android
-          if (window.platform === "ios") {
-            this.views.show();
-          }
+          setTimeout(this.showIfFontsNotLoading.bind(this), 100);
 				}.bind(this));
 		}
 	}

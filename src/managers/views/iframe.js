@@ -505,7 +505,7 @@ class IframeView {
 	}
 
 	show() {
-
+    
 		this.element.style.visibility = "visible";
 
 		if(this.iframe){
