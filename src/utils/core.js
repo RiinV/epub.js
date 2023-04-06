@@ -483,7 +483,7 @@ export function parse(markup, mime, forceXMLDom) {
 
 	// Remove byte order mark before parsing
 	// https://www.w3.org/International/questions/qa-byte-order-mark
-	if(markup.charCodeAt(0) === 0xFEFF) {
+	if(markup && markup.charCodeAt(0) === 0xFEFF) {
 		markup = markup.slice(1);
 	}
 
