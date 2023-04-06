@@ -295,14 +295,14 @@ class Book {
 	 */
 	openEpub(data, encoding) {
 		return this.unarchive(data, encoding || this.settings.encoding)
-			.then(() => {
-				return this.openLicense();
-			}, () => {
-			})
-			.then(() => {
-				return this.openEncryption();
-			}, () => {
-			})
+			// .then(() => {
+			// 	return this.openLicense();
+			// }, () => {
+			// })
+			// .then(() => {
+			// 	return this.openEncryption();
+			// }, () => {
+			// })
 			.then(() => {
 				return this.openContainer(CONTAINER_PATH);
 			})
@@ -318,13 +318,15 @@ class Book {
 	 */
 	openEpubFromPath(url) {
 		this.path = new Path(url);
-		return this.openLicense()
-			.then(() => {
-				return this.openEncryption();
-			})
-			.then(() => {
-				return this.openContainer(CONTAINER_PATH);
-			})
+		// return 
+		
+		// this.openLicense()
+		// 	.then(() => {
+		// 		return this.openEncryption();
+		// 	})
+		// 	.then(() => {
+			return this.openContainer(CONTAINER_PATH)
+			// })
 			.then((packagePath) => {
 				return this.openPackaging(packagePath);
 			});
