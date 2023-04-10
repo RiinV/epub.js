@@ -34,7 +34,7 @@ class Encryption {
 			return;
 		}
 		const sha256 = md.sha256.create();
-		sha256.update(this.userPassphrase, "binary");
+		sha256.update(this.userPassphrase, "utf8");
 		const digest = sha256.digest();
 		const userKey = digest.bytes();
 
@@ -53,14 +53,14 @@ class Encryption {
 		if (!this.contentKey) {
 			return "";
 		}
-    
+
     const decipher = cipher.createDecipher("AES-CBC", util.decode64(this.contentKey));
 		const encryptedBuffer = util.createBuffer(data);
 		const iv = encryptedBuffer.getBytes(AES_BLOCK_SIZE);
 		decipher.start({iv: iv});
 		decipher.update(encryptedBuffer);
 		const result = decipher.finish();
-		const output = decipher.output;
+    const output = decipher.output;
 		return util.decodeUtf8(output.bytes());
 	}
 

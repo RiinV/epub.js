@@ -344,7 +344,7 @@ class Book {
 		return this.load(LICENSE_PATH, "json").then((license) => {
 			this.encryption.decryptContentKey(license.encryption.content_key.encrypted_value);
 		}).catch((err) => {
-			console.log("The epub file is not encrypted.");
+      console.log("The epub file is not encrypted.");
 		});
 	}
 

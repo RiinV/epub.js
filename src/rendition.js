@@ -218,7 +218,7 @@ class Rendition {
 		if(!this.manager) {
 			this.ViewManager = this.requireManager(this.settings.manager);
 			this.View = this.requireView(this.settings.view);
-
+      
 			this.manager = new this.ViewManager({
 				view: this.View,
 				queue: this.q,

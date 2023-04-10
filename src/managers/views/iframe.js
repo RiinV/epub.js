@@ -482,10 +482,8 @@ class IframeView {
 		var displayed = new defer();
 
 		if (!this.displayed) {
-
 			this.render(request)
 				.then(function () {
-
 					this.emit(EVENTS.VIEWS.DISPLAYED, this);
 					this.onDisplayed(this);
 
