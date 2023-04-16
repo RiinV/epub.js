@@ -339,7 +339,7 @@ class DefaultViewManager {
 			}.bind(this))
 			.then(function(){
 
-				setTimeout(this.showIfFontsNotLoading.bind(this), 50);
+				setTimeout(this.showIfFontsNotLoading.bind(this), 100);
 
 				displaying.resolve();
 
@@ -518,7 +518,7 @@ class DefaultViewManager {
 					return err;
 				})
 				.then(function(){
-					setTimeout(this.showIfFontsNotLoading.bind(this), 50);
+					setTimeout(this.showIfFontsNotLoading.bind(this), 100);
 				}.bind(this));
 		}
 
@@ -610,7 +610,7 @@ class DefaultViewManager {
 				.then(function(){
 					return new Promise((resolve, reject) => {
 						const boundFunction = this.showIfFontsNotLoading.bind(this);
-						setTimeout(() => boundFunction(true, resolve), 50);
+						setTimeout(() => boundFunction(true, resolve), 100);
 					});
 				}.bind(this)).then(function(){
 					return true;
