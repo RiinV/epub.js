@@ -237,8 +237,8 @@ class IframeView {
 		}
 
 		if(what === "both" &&
-			 isNumber(width) &&
-			 isNumber(height)){
+      isNumber(width) &&
+      isNumber(height)){
 
 			this.lockedWidth = width - elBorders.width - iframeBorders.width;
 			this.lockedHeight = height - elBorders.height - iframeBorders.height;

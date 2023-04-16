@@ -709,7 +709,7 @@ class Rendition {
 					}.bind(this));
 				} else if (location) {
 					let located = this.located(location);
-
+          
 					if (!located || !located.start || !located.end) {
 						return;
 					}

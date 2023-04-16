@@ -16,7 +16,7 @@ class DefaultViewManager {
 		this.request = options.request;
 		this.renditionQueue = options.queue;
 		this.q = new Queue(this);
-    this.areFontsLoading = false;
+		this.areFontsLoading = false;
 
 		this.settings = extend(this.settings || {}, {
 			infinite: true,
@@ -46,27 +46,35 @@ class DefaultViewManager {
 
 	}
 
-  showIfFontsNotLoading(){
-    var show = this.views.show.bind(this.views);
-    if (!this.areFontsLoading) {
-      show();
-    } else setTimeout(this.showIfFontsNotLoading.bind(this), 50);
-  }
-  
-  startLoadingFonts(){
-    this.areFontsLoading = true;
-    window.ReactNativeWebView.postMessage(JSON.stringify({ method: "font", value: true }));
-  }
+	showIfFontsNotLoading(isPrev, resolve){
+		var show = this.views.show.bind(this.views);
+		if (!this.areFontsLoading) {
+			if (isPrev) {
+				var boundScrollFunction = this.scrollFunction.bind(this);
+				boundScrollFunction();
+			}
+			show();
+			resolve();
+		} else {
+			const boundFunction = this.showIfFontsNotLoading.bind(this);
+			setTimeout(() => boundFunction(isPrev, resolve), 50);
+		}
+	}
+	
+	startLoadingFonts(){
+		this.areFontsLoading = true;
+		window.ReactNativeWebView.postMessage(JSON.stringify({ method: "font", value: true }));
+	}
 
 	prepareLayoutAndDisplay(){
 		var updateLayout = this.updateLayout.bind(this);
-    updateLayout();
+		updateLayout();
 		if(this.cfiToLoad) {
 			window.rendition.display(this.cfiToLoad);
 		}
 		this.cfiToLoad = null;
-    this.areFontsLoading = false;
-    window.ReactNativeWebView.postMessage(JSON.stringify({ method: "font", value: false }));
+		this.areFontsLoading = false;
+		window.ReactNativeWebView.postMessage(JSON.stringify({ method: "font", value: false }));
 	}
 
 	render(element, size){
@@ -75,7 +83,7 @@ class DefaultViewManager {
 		if (typeof this.settings.fullsize === "undefined" &&
 				tag && (tag.toLowerCase() == "body" ||
 				tag.toLowerCase() == "html")) {
-				this.settings.fullsize = true;
+			this.settings.fullsize = true;
 		}
 
 		if (this.settings.fullsize) {
@@ -331,7 +339,7 @@ class DefaultViewManager {
 			}.bind(this))
 			.then(function(){
 
-        setTimeout(this.showIfFontsNotLoading.bind(this), 50);
+				setTimeout(this.showIfFontsNotLoading.bind(this), 50);
 
 				displaying.resolve();
 
@@ -347,13 +355,13 @@ class DefaultViewManager {
 
 	afterDisplayed(view){
 		this.emit(EVENTS.MANAGERS.ADDED, view);
-    if (window.platform !== "ios") {
-      var onFontsLoadingDone = debounce(this.prepareLayoutAndDisplay.bind(this), 150);
-      var onFontsLoadingStart = this.startLoadingFonts.bind(this);
+		// if (window.platform !== "ios") {
+		var onFontsLoadingDone = debounce(this.prepareLayoutAndDisplay.bind(this), 150);
+		var onFontsLoadingStart = this.startLoadingFonts.bind(this);
 
-      view.document.fonts.onloadingdone = onFontsLoadingDone;
-      view.document.fonts.onloading = onFontsLoadingStart;
-    }
+		view.document.fonts.onloadingdone = onFontsLoadingDone;
+		view.document.fonts.onloading = onFontsLoadingStart;
+		// }
 	}
 
 	afterResized(view){
@@ -510,11 +518,21 @@ class DefaultViewManager {
 					return err;
 				})
 				.then(function(){
-          setTimeout(this.showIfFontsNotLoading.bind(this), 50);
+					setTimeout(this.showIfFontsNotLoading.bind(this), 50);
 				}.bind(this));
 		}
 
 
+	}
+
+	scrollFunction() {
+		if(this.isPaginated && this.settings.axis === "horizontal") {
+			if (this.settings.direction === "rtl") {
+				this.scrollTo(0, 0, true);
+			} else {
+				this.scrollTo(this.container.scrollWidth - this.layout.delta, 0, true);
+			}
+		}
 	}
 
 	prev(){
@@ -590,15 +608,13 @@ class DefaultViewManager {
 					return err;
 				})
 				.then(function(){
-					if(this.isPaginated && this.settings.axis === "horizontal") {
-						if (this.settings.direction === "rtl") {
-							this.scrollTo(0, 0, true);
-						} else {
-							this.scrollTo(this.container.scrollWidth - this.layout.delta, 0, true);
-						}
-					}
-          setTimeout(this.showIfFontsNotLoading.bind(this), 50);
-				}.bind(this));
+					return new Promise((resolve, reject) => {
+						const boundFunction = this.showIfFontsNotLoading.bind(this);
+						setTimeout(() => boundFunction(true, resolve), 50);
+					});
+				}.bind(this)).then(function(){
+					return true;
+				});
 		}
 	}
 
@@ -722,7 +738,6 @@ class DefaultViewManager {
 				startPage = totalPages - endPage;
 				endPage = totalPages - tempStartPage;
 			}
-
 
 			for (var i = startPage + 1; i <= endPage; i++) {
 				let pg = i;

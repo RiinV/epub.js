@@ -476,7 +476,7 @@ export function parse(markup, mime, forceXMLDom) {
 	var Parser;
 
 	if (typeof DOMParser === "undefined" || forceXMLDom) {
-		Parser = require("xmldom").DOMParser;
+		Parser = require("@xmldom/xmldom").DOMParser;
 	} else {
 		Parser = DOMParser;
 	}
