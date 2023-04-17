@@ -69,10 +69,6 @@ class DefaultViewManager {
 	prepareLayoutAndDisplay(){
 		var updateLayout = this.updateLayout.bind(this);
 		updateLayout();
-		if(this.cfiToLoad) {
-			window.rendition.display(this.cfiToLoad);
-		}
-		this.cfiToLoad = null;
 		this.areFontsLoading = false;
 		window.ReactNativeWebView.postMessage(JSON.stringify({ method: "font", value: false }));
 	}
@@ -328,7 +324,6 @@ class DefaultViewManager {
 				if(target) {
 					let offset = view.locationOf(target);
 					this.moveTo(offset);
-					this.cfiToLoad = target;
 				}
 
 			}.bind(this), (err) => {
