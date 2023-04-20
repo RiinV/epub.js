@@ -465,7 +465,7 @@ class ContinuousViewManager extends DefaultViewManager {
 	}
 
 	scrolled() {
-
+    
 		this.q.enqueue(function() {
 			this.check();
 		}.bind(this));

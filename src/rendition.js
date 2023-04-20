@@ -875,7 +875,13 @@ class Rendition {
 			contents.on(e, (ev) => this.triggerViewEvent(ev, contents));
 		});
 
-		contents.on(EVENTS.CONTENTS.SELECTED, (e) => this.triggerSelectedEvent(e, contents));
+		contents.on(EVENTS.CONTENTS.SELECTED, (e) => {
+			this.triggerSelectedEvent(e, contents);
+		});
+
+		contents.on(EVENTS.CONTENTS.SELECTION_ACTIVE_CHANGE, (isSelectionActive) => {
+			this.emit(EVENTS.RENDITION.SELECTION_ACTIVE_CHANGE, isSelectionActive, contents);
+		});
 	}
 
 	/**

@@ -54,7 +54,9 @@ class DefaultViewManager {
 				boundScrollFunction();
 			}
 			show();
-			resolve();
+			if (resolve) {
+				resolve();
+			}
 		} else {
 			const boundFunction = this.showIfFontsNotLoading.bind(this);
 			setTimeout(() => boundFunction(isPrev, resolve), 50);

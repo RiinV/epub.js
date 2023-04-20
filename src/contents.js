@@ -30,6 +30,7 @@ class Contents {
 		this.documentElement =  this.document.documentElement;
 		this.content = content || this.document.body;
 		this.window = this.document.defaultView;
+		this.isSelectionActive = false;
 
 		this._size = {
 			width: 0,
@@ -916,6 +917,8 @@ class Contents {
 	 * @private
 	 */
 	onSelectionChange(e){
+    this.isSelectionActive = true;
+		this.emit(EVENTS.CONTENTS.SELECTION_ACTIVE_CHANGE, this.isSelectionActive);
 		if (this.selectionEndTimeout) {
 			clearTimeout(this.selectionEndTimeout);
 		}
@@ -933,6 +936,8 @@ class Contents {
 		var range, cfirange;
 
 		if (selection && selection.rangeCount > 0) {
+			this.isSelectionActive = false;
+			this.emit(EVENTS.CONTENTS.SELECTION_ACTIVE_CHANGE, this.isSelectionActive);
 			range = selection.getRangeAt(0);
 			if(!range.collapsed) {
 				// cfirange = this.section.cfiFromRange(range);
