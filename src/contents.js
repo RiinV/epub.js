@@ -917,7 +917,7 @@ class Contents {
 	 * @private
 	 */
 	onSelectionChange(e){
-    this.isSelectionActive = true;
+  	this.isSelectionActive = true;
 		this.emit(EVENTS.CONTENTS.SELECTION_ACTIVE_CHANGE, this.isSelectionActive);
 		if (this.selectionEndTimeout) {
 			clearTimeout(this.selectionEndTimeout);
@@ -1063,6 +1063,7 @@ class Contents {
 
 		this.css("box-sizing", "border-box");
 		this.css("max-width", "inherit");
+		this.css("break-inside", "avoid-column");
 
 		this.css(COLUMN_AXIS, "horizontal");
 		this.css(COLUMN_FILL, "auto");
@@ -1168,7 +1169,6 @@ class Contents {
 	 */
 	writingMode(mode) {
 		let WRITING_MODE = prefixed("writing-mode");
-
 		if (mode && this.documentElement) {
 			this.documentElement.style[WRITING_MODE] = mode;
 		}

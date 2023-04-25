@@ -960,7 +960,7 @@ class Rendition {
 		let computed = contents.window.getComputedStyle(contents.content, null);
 		let height = (contents.content.offsetHeight - (parseFloat(computed.paddingTop) + parseFloat(computed.paddingBottom))) * .95;
 		let horizontalPadding = parseFloat(computed.paddingLeft) + parseFloat(computed.paddingRight);
-
+    
 		contents.addStylesheetRules({
 			"img" : {
 				"max-width": (this._layout.columnWidth ? (this._layout.columnWidth - horizontalPadding) + "px" : "100%") + "!important",
