@@ -2,6 +2,7 @@ import EventEmitter from "event-emitter";
 import {isNumber, prefixed, borders, defaults} from "./utils/core";
 import EpubCFI from "./epubcfi";
 import Mapping from "./mapping";
+// import { size } from "lodash";
 import {replaceLinks} from "./utils/replacements";
 import { EPUBJS_VERSION, EVENTS, DOM_EVENTS } from "./utils/constants";
 
@@ -268,6 +269,27 @@ class Contents {
 
 		return this.window.getComputedStyle(content)[property];
 	}
+
+	// getContentWrapper(element) {
+	// 	if (size(element.children) === 1) {
+	// 		return this.getContentWrapper(element.children[0]);
+	// 	}
+	// 	return element;
+	// }
+
+	// childCss(property, value, priority) {
+	// 	var content = this.content || this.document.body;
+	// 	var contentSection = this.getContentWrapper(content);
+		
+
+	// 	if (value) {
+	// 		contentSection.style.setProperty(property, value, priority ? "important" : "");
+	// 	} else {
+	// 		contentSection.style.removeProperty(property);
+	// 	}
+
+	// 	return this.window.getComputedStyle(contentSection)[property];
+	// }
 
 	/**
 		* Get or Set the viewport element
@@ -1063,7 +1085,18 @@ class Contents {
 
 		this.css("box-sizing", "border-box");
 		this.css("max-width", "inherit");
-		this.css("break-inside", "avoid-column");
+    this.css("break-inside", "avoid-column");
+
+		// this.childCss("display", "flex");
+		// this.childCss("flex-direction", "column");
+		// this.childCss("overflow-x", "auto");
+    // this.childCss("overflow-y", "hidden");
+    // this.childCss("flex-wrap", "wrap");
+		// this.childCss("width", columnWidth + "px");
+		// this.childCss("height", height + "px");
+    // this.childCss("column-gap", gap + "px");
+		// this.childCss("grid-auto-row", "minmax(30px, auto)");
+		// this.childCss("grid-template-columns", height + "px");
 
 		this.css(COLUMN_AXIS, "horizontal");
 		this.css(COLUMN_FILL, "auto");

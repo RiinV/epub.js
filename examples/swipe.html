@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -28,23 +29,23 @@
     }
 
 
-    @media only screen
-      and (min-device-width : 320px)
-      and (max-device-width : 667px) {
-        #viewer {
-          height: 96.5%;
-        }
-        #viewer iframe {
-          /* pointer-events: none; */
-        }
-        .arrow {
-          position: inherit;
-          display: none;
-        }
-    }
+    @media only screen and (min-device-width : 320px) and (max-device-width : 667px) {
+      #viewer {
+        height: 96.5%;
+      }
 
+      #viewer iframe {
+        /* pointer-events: none; */
+      }
+
+      .arrow {
+        position: inherit;
+        display: none;
+      }
+    }
   </style>
 </head>
+
 <body>
   <div id="viewer"></div>
   <div id="prev" class="arrow">‹</div>
@@ -62,26 +63,26 @@
 
     var displayed = rendition.display("chapter_001.xhtml");
 
-    displayed.then(function(renderer){
+    displayed.then(function (renderer) {
       // -- do stuff
     });
 
     // Navigation loaded
-    book.loaded.navigation.then(function(toc){
+    book.loaded.navigation.then(function (toc) {
       // console.log(toc);
     });
 
     var next = document.getElementById("next");
-    next.addEventListener("click", function(){
+    next.addEventListener("click", function () {
       rendition.next();
     }, false);
 
     var prev = document.getElementById("prev");
-    prev.addEventListener("click", function(){
+    prev.addEventListener("click", function () {
       rendition.prev();
     }, false);
 
-    document.addEventListener("keyup", function(e){
+    document.addEventListener("keyup", function (e) {
 
       // Left Key
       if ((e.keyCode || e.which) == 37) {
@@ -107,4 +108,5 @@
   </script>
 
 </body>
+
 </html>
