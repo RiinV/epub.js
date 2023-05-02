@@ -196,6 +196,7 @@ class Themes {
 			const bgColor = theme.rules.body["background-color"];
 			const container = this.rendition.views().container;
 			container.style.cssText += "background-color:" + bgColor + ";";
+      document.body.style.background = bgColor + ";";
 			theme.injected = true;
 		}
 	}
