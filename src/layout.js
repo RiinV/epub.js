@@ -117,11 +117,11 @@ class Layout {
 		var pageWidth;
 		var delta;
 
-		if (this._spread && width >= this._minSpreadWidth) {
-			divisor = 2;
-		} else {
-			divisor = 1;
-		}
+		// if (this._spread && width >= this._minSpreadWidth) {
+		// 	divisor = 2;
+		// } else {
+		// 	divisor = 1;
+		// }
 
 		if (this.name === "reflowable" && this._flow === "paginated" && !(_gap >= 0)) {
 			gap = ((section % 2 === 0) ? section : section - 1);
